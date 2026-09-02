@@ -41,14 +41,29 @@ body{
   background:radial-gradient(ellipse at 20% 0%, rgba(249,115,22,0.06), transparent 50%),#0f1923;
   min-height:100vh;
   padding:calc(8px + env(safe-area-inset-top)) calc(12px + env(safe-area-inset-right))
-          calc(46px + env(safe-area-inset-bottom)) calc(12px + env(safe-area-inset-left));
+          calc(86px + env(safe-area-inset-bottom)) calc(12px + env(safe-area-inset-left));
   -webkit-tap-highlight-color:transparent;touch-action:manipulation;overscroll-behavior-y:none;
 }
 @supports (min-height:100dvh){ body{min-height:100dvh} }
+body.phase-ende{padding-bottom:calc(22px + env(safe-area-inset-bottom))}
 .wrap{max-width:1100px;margin:0 auto;display:flex;flex-direction:column;gap:10px}
 
 /* ---------- Kopfleiste ---------- */
-.topbar{display:flex;align-items:center;gap:10px;min-height:40px}
+.topbar{display:flex;align-items:center;gap:10px;min-height:40px;flex-wrap:wrap}
+
+/* Segment-Schalter: Ansicht wählen */
+.seg{display:inline-flex;border:1px solid var(--border);border-radius:12px;overflow:hidden;background:#1c2e40}
+.seg button{
+  -webkit-appearance:none;appearance:none;border:none;background:transparent;
+  color:#94a3b8;-webkit-text-fill-color:#94a3b8;
+  min-height:44px;min-width:48px;padding:0 11px;cursor:pointer;touch-action:manipulation;
+  display:inline-flex;align-items:center;justify-content:center;gap:7px;
+  font-family:var(--sans);font-size:13.5px;font-weight:600;transition:background .15s,color .15s;
+}
+.seg button + button{border-left:1px solid var(--border)}
+.seg button.on{background:rgba(125,211,192,0.16);color:var(--healthy);-webkit-text-fill-color:var(--healthy)}
+.seg button:focus-visible{outline:3px solid var(--accent);outline-offset:-3px}
+.seg svg{display:block}
 .topbar .spacer{flex:1}
 .steps{display:flex;gap:6px;align-items:center}
 .steps i{width:7px;height:7px;border-radius:50%;background:#31445a;display:block;transition:background .2s,transform .2s}
@@ -74,6 +89,10 @@ body{
 .layout{display:grid;grid-template-columns:1fr;gap:12px;align-items:start}
 @media(min-width:900px){.layout{grid-template-columns:minmax(0,1.15fr) minmax(0,1fr);gap:20px}}
 .card{background:#162230;border:1px solid var(--border);border-radius:var(--radius);padding:11px;display:flex;flex-direction:column;gap:9px}
+/* Die Bühne bleibt beim Scrollen oben stehen, damit das Bild immer sichtbar ist */
+@media (max-width:899px){
+  #stageCard{position:sticky;top:calc(2px + env(safe-area-inset-top));z-index:10}
+}
 
 /* ---------- Bühne ---------- */
 .stage{
@@ -122,6 +141,7 @@ body{
 input[type=range]{
   -webkit-appearance:none;appearance:none;flex:1;min-width:0;
   height:36px;margin:0;padding:0;background:transparent;outline:none;cursor:pointer;
+  touch-action:pan-y;   /* senkrecht wischen scrollt die Seite, statt den Regler zu ziehen */
 }
 input[type=range]::-webkit-slider-runnable-track{height:10px;border-radius:8px;background:#1c2e40;border:none}
 input[type=range]::-webkit-slider-thumb{
@@ -131,8 +151,11 @@ input[type=range]::-webkit-slider-thumb{
 input[type=range]::-moz-range-track{height:10px;border-radius:8px;background:#1c2e40;border:none}
 input[type=range]::-moz-range-thumb{width:28px;height:28px;border-radius:50%;background:var(--accent);border:4px solid #162230;cursor:pointer}
 input[type=range]:focus-visible::-webkit-slider-thumb{box-shadow:0 0 0 4px rgba(249,115,22,.4)}
-.slabel{display:none;font-size:13px;color:#94a3b8;-webkit-text-fill-color:#94a3b8;margin:-2px 0 4px 36px}
+.slabel{display:none;font-size:12.5px;color:#94a3b8;-webkit-text-fill-color:#94a3b8;margin:-4px 0 2px 36px}
 .mit-text .slabel{display:block}
+.mit-text .stage{max-height:29vh}
+@supports (max-height:1dvh){ .mit-text .stage{max-height:29dvh} }
+.mit-text .hint{font-size:11.5px}
 
 .toolrow{display:flex;gap:8px;flex-wrap:wrap;align-items:center}
 
@@ -155,13 +178,21 @@ input[type=range]:focus-visible::-webkit-slider-thumb{box-shadow:0 0 0 4px rgba(
 #btnRestart svg{width:34px;height:34px}
 
 /* ---------- Stopp ---------- */
+/* ---------- Feste Fußleiste ---------- */
+.bottombar{
+  position:fixed;left:0;right:0;bottom:0;z-index:60;
+  display:flex;align-items:center;
+  padding:9px calc(14px + env(safe-area-inset-right)) calc(9px + env(safe-area-inset-bottom)) calc(14px + env(safe-area-inset-left));
+  background:rgba(15,25,35,0.95);border-top:1px solid var(--border);
+  -webkit-backdrop-filter:blur(10px);backdrop-filter:blur(10px);
+}
+.bottombar[hidden]{display:none}
+.bb-spacer{flex:1}
+#btnNext{min-width:96px;min-height:52px;border-radius:14px}
 #btnStop{
-  position:fixed;z-index:60;
-  right:calc(14px + env(safe-area-inset-right));
-  bottom:calc(14px + env(safe-area-inset-bottom));
-  width:62px;height:62px;border-radius:50%;border:none;
+  width:58px;height:58px;border-radius:50%;border:none;flex:none;
   background:var(--stop);color:#fff;-webkit-text-fill-color:#fff;
-  box-shadow:0 6px 22px rgba(0,0,0,.5);cursor:pointer;touch-action:manipulation;
+  box-shadow:0 4px 14px rgba(0,0,0,.45);cursor:pointer;touch-action:manipulation;
   display:flex;align-items:center;justify-content:center;transition:transform .12s,opacity .3s;
 }
 #btnStop:active{transform:scale(.93)}
@@ -170,11 +201,16 @@ input[type=range]:focus-visible::-webkit-slider-thumb{box-shadow:0 0 0 4px rgba(
 /* ---------- Text-Modus ---------- */
 .txt{display:none}
 .mit-text .txt{display:block}
-h1{font-size:19px;font-weight:700;letter-spacing:-.01em;margin-bottom:2px}
-.sub{font-size:13.5px;color:#94a3b8;-webkit-text-fill-color:#94a3b8;line-height:1.45}
+h1{font-size:17px;font-weight:700;letter-spacing:-.01em;margin-bottom:1px}
+.sub{font-size:12.5px;color:#94a3b8;-webkit-text-fill-color:#94a3b8;line-height:1.4}
 .hint{font-size:12px;color:#64748b;-webkit-text-fill-color:#64748b;line-height:1.4}
 .dimmed{opacity:.45;pointer-events:none}
 [hidden]{display:none !important}
+/* Endansicht: kleine Bühne, kein Hinweistext. Steht bewusst am Schluss,
+   damit es die Text-Ansicht überschreibt. */
+.phase-ende .stage{max-height:16vh}
+@supports (max-height:1dvh){ .phase-ende .stage{max-height:16dvh} }
+.phase-ende .privacy{display:none !important}
 @media (prefers-reduced-motion: reduce){ *{transition:none !important;animation:none !important} }
 </style>
 </head>
@@ -185,9 +221,22 @@ h1{font-size:19px;font-weight:700;letter-spacing:-.01em;margin-bottom:2px}
     <button class="ibtn" id="btnText" aria-label="Text ein- oder ausblenden" title="Text ein/aus">
       <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M4 7V5h16v2M9 5v14M15 5v14M7 19h4M13 19h4"/></svg>
     </button>
-    <button class="ibtn" id="btnModus" aria-label="Geführter oder freier Ablauf" title="Geführt / frei">
-      <svg id="icoModus" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M4 6h16M4 12h16M4 18h16"/></svg>
-    </button>
+    <div class="seg" id="seg" role="group" aria-label="Ansicht wählen">
+      <button id="btnFrei" aria-label="Alle Regler zeigen" title="Alle Regler – zum Zeigen und Erklären">
+        <svg width="21" height="21" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round">
+          <path d="M3 7h18"/><circle cx="9" cy="7" r="2.6" fill="currentColor" stroke="none"/>
+          <path d="M3 12h18"/><circle cx="15.5" cy="12" r="2.6" fill="currentColor" stroke="none"/>
+          <path d="M3 17h18"/><circle cx="7" cy="17" r="2.6" fill="currentColor" stroke="none"/>
+        </svg>
+        <span class="txt">Alle Regler</span>
+      </button>
+      <button id="btnGefuehrt" aria-label="Schritt für Schritt" title="Schritt für Schritt – zum Selbermachen">
+        <svg width="21" height="21" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+          <circle cx="12" cy="12" r="9"/><path d="M10.2 8.4l5.6 3.6-5.6 3.6z" fill="currentColor" stroke="none"/>
+        </svg>
+        <span class="txt">Schritt für Schritt</span>
+      </button>
+    </div>
     <div class="spacer"></div>
     <div class="steps" id="steps" hidden></div>
   </div>
@@ -218,7 +267,7 @@ h1{font-size:19px;font-weight:700;letter-spacing:-.01em;margin-bottom:2px}
         </button>
         <input type="file" id="fileInput" accept="image/*" hidden>
       </div>
-      <p class="hint txt">Dein Bild bleibt auf deinem Gerät – es wird nicht hochgeladen und nicht gespeichert.</p>
+      <p class="hint txt privacy">Dein Bild bleibt auf deinem Gerät – es wird nicht hochgeladen und nicht gespeichert.</p>
     </div>
 
     <!-- Bedienung -->
@@ -288,12 +337,6 @@ h1{font-size:19px;font-weight:700;letter-spacing:-.01em;margin-bottom:2px}
           </button>
         </div>
         <p class="hint txt" id="musicHint">Eine Melodie über dem Bild verändert, wie es sich anfühlt. Probier beide aus.</p>
-
-        <div class="toolrow" id="nextRow" style="margin-top:10px;justify-content:flex-end" hidden>
-          <button class="ibtn primary" id="btnNext" aria-label="Weiter" style="min-width:76px">
-            <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12h13M13 6l6 6-6 6"/></svg>
-          </button>
-        </div>
       </div>
 
       <!-- Ende -->
@@ -344,9 +387,16 @@ h1{font-size:19px;font-weight:700;letter-spacing:-.01em;margin-bottom:2px}
   </div>
 </div>
 
-<button id="btnStop" aria-label="Stopp – Bild ausblenden">
-  <svg width="26" height="26" viewBox="0 0 24 24" fill="currentColor"><rect x="6" y="6" width="12" height="12" rx="2.5"/></svg>
-</button>
+<div class="bottombar" id="bottombar">
+  <button id="btnStop" aria-label="Stopp – Bild ausblenden">
+    <svg width="26" height="26" viewBox="0 0 24 24" fill="currentColor"><rect x="6" y="6" width="12" height="12" rx="2.5"/></svg>
+  </button>
+  <div class="bb-spacer"></div>
+  <button class="ibtn primary" id="btnNext" aria-label="Weiter" hidden>
+    <svg width="26" height="26" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12h13M13 6l6 6-6 6"/></svg>
+    <span class="txt">Weiter</span>
+  </button>
+</div>
 
 <audio id="audio" loop playsinline webkit-playsinline preload="none"></audio>
 
@@ -476,9 +526,36 @@ function anwenden(){
   pic.style.webkitFilter = f; pic.style.filter = f;
   holder.style.transform = 'translateZ(0) scale(' + scale.toFixed(3) + ')';
 }
+/* Beim senkrechten Wischen über einen Regler soll die Seite scrollen und der Wert
+   unverändert bleiben. Der Browser setzt den Wert schon beim Antippen – deshalb
+   merken wir ihn und stellen ihn zurück, sobald klar ist, dass senkrecht gewischt wird. */
+function scrollSchutz(el, danach){
+  var sx = 0, sy = 0, startWert = '0', richtung = '?';
+  el.addEventListener('touchstart', function(e){
+    if (!e.touches.length) return;
+    sx = e.touches[0].clientX; sy = e.touches[0].clientY;
+    startWert = el.value; richtung = '?';
+  }, { passive: true });
+  el.addEventListener('touchmove', function(e){
+    if (!e.touches.length) return;
+    if (richtung === '?'){
+      var dx = Math.abs(e.touches[0].clientX - sx), dy = Math.abs(e.touches[0].clientY - sy);
+      if (dx > 6 || dy > 6) richtung = (dx > dy) ? 'quer' : 'hoch';
+    }
+    if (richtung === 'hoch' && el.value !== startWert){ el.value = startWert; danach(); }
+  }, { passive: true });
+  function ende(){
+    if (richtung === 'hoch' && el.value !== startWert){ el.value = startWert; danach(); }
+    richtung = '?';
+  }
+  el.addEventListener('touchend', ende);
+  el.addEventListener('touchcancel', ende);
+}
+
 for (var i = 0; i < regler.length; i++){
   regler[i].addEventListener('input', anwenden);
   regler[i].addEventListener('change', anwenden);
+  scrollSchutz(regler[i], anwenden);
 }
 function reglerZuruecksetzen(){
   rFarbe.value = 0; rSchaerfe.value = 0; rGroesse.value = 0; rHell.value = 0;
@@ -607,32 +684,34 @@ function reihenSetzen(){
     var label = reihen[i].nextElementSibling;
     if (label && label.classList.contains('slabel')) label.style.display = (sichtbar && mitText) ? 'block' : 'none';
   }
-  $('nextRow').hidden = !gefuehrt;
+  $('btnNext').hidden = !gefuehrt;
   $('musicHint').style.display = (mitText && (!gefuehrt || schritte[schrittIndex] === 'musik')) ? 'block' : 'none';
   punkteZeichnen();
 }
+function modusSetzen(neu, speichern){
+  gefuehrt = !!neu;
+  if (speichern) schreibe('ib_gefuehrt', gefuehrt);
+  $('btnFrei').classList.toggle('on', !gefuehrt);
+  $('btnGefuehrt').classList.toggle('on', gefuehrt);
+  $('btnFrei').setAttribute('aria-pressed', String(!gefuehrt));
+  $('btnGefuehrt').setAttribute('aria-pressed', String(gefuehrt));
+  schrittIndex = 0;
+  if (phase === 'uebung') reihenSetzen(); else punkteZeichnen();
+}
+$('btnFrei').addEventListener('click', function(){ modusSetzen(false, true); });
+$('btnGefuehrt').addEventListener('click', function(){ modusSetzen(true, true); });
+
 $('btnNext').addEventListener('click', function(){
   if (schrittIndex < schritte.length - 1){ schrittIndex++; reihenSetzen(); }
   else { beenden(); }
 });
-$('btnModus').addEventListener('click', function(){
-  gefuehrt = !gefuehrt;
-  schreibe('ib_gefuehrt', gefuehrt);
-  $('icoModus').innerHTML = gefuehrt
-    ? '<path d="M8 6h12M8 12h12M8 18h12"/><circle cx="4" cy="6" r="1.4" fill="currentColor"/><circle cx="4" cy="12" r="1.4" fill="currentColor"/><circle cx="4" cy="18" r="1.4" fill="currentColor"/>'
-    : '<path d="M4 6h16M4 12h16M4 18h16"/>';
-  $('btnModus').classList.toggle('on', gefuehrt);
-  schrittIndex = 0;
-  reihenSetzen();
-});
-
 function phaseSetzen(p){
   phase = p;
   $('scalePanel').hidden = (p !== 'skala');
   $('ctrlPanel').hidden  = (p !== 'uebung');
   $('endPanel').hidden   = (p !== 'ende');
   $('pickrow').style.display = (p === 'ende') ? 'none' : '';
-  $('btnStop').hidden = (p === 'ende');
+  $('bottombar').hidden = (p === 'ende');
   document.body.classList.toggle('phase-ende', p === 'ende');
   if (p === 'uebung') reihenSetzen(); else punkteZeichnen();
 }
@@ -657,7 +736,7 @@ function ausblenden(fertig){
   }, D + 250);
 }
 function beenden(){
-  $('btnStop').hidden = true;
+  $('bottombar').hidden = true;
   ausblenden(function(){
     phaseSetzen('ende');
     if (EINSTELLUNGEN.belastungsskala && werteVorher !== null){
@@ -700,11 +779,8 @@ function neustart(){
 
 /* ---------- Start ---------- */
 gefuehrt = lese('ib_gefuehrt', EINSTELLUNGEN.startGefuehrt);
-if (!EINSTELLUNGEN.gefuehrterAblauf){ gefuehrt = false; $('btnModus').hidden = true; }
-$('btnModus').classList.toggle('on', gefuehrt);
-if (gefuehrt){
-  $('icoModus').innerHTML = '<path d="M8 6h12M8 12h12M8 18h12"/><circle cx="4" cy="6" r="1.4" fill="currentColor"/><circle cx="4" cy="12" r="1.4" fill="currentColor"/><circle cx="4" cy="18" r="1.4" fill="currentColor"/>';
-}
+if (!EINSTELLUNGEN.gefuehrterAblauf){ gefuehrt = false; $('seg').hidden = true; }
+modusSetzen(gefuehrt, false);
 if (!EINSTELLUNGEN.reglerHelligkeit){
   var hRow = document.querySelector('[data-step="helligkeit"]');
   if (hRow){ hRow.style.display = 'none'; if (hRow.nextElementSibling) hRow.nextElementSibling.style.display = 'none'; }

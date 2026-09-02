@@ -2,7 +2,7 @@
    WICHTIG: Nach jeder Änderung an index.html die Zahl in VERSION um eins erhöhen
    (z. B. v3 statt v2) und die Datei mit hochladen. Sonst sehen Handys,
    die die App schon einmal geöffnet haben, weiter die alte Fassung. */
-const VERSION = 'inneres-bild-v3';
+const VERSION = 'inneres-bild-v4';
 const DATEIEN = ['./', './index.html', './manifest.webmanifest', './icon-180.png', './icon-192.png', './icon-512.png'];
 
 self.addEventListener('install', e => {
